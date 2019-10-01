@@ -4,11 +4,13 @@ import com.lm.challenge.taxes.service.dto.base.type.ProductTypeDTO;
 import lombok.Builder;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 @Builder
 public class ProductBaseDTO {
 
-    private Double price;
+    private BigDecimal price;
 
     private ProductTypeDTO type;
 

@@ -4,11 +4,13 @@ import com.lm.challenge.taxes.service.dto.base.BasketBaseDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.math.BigDecimal;
+
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class BasketODTO extends BasketBaseDTO {
 
-    private Double taxes;
+    private BigDecimal taxes;
 
-    private Double totalPrice;
+    private BigDecimal totalPrice;
 }

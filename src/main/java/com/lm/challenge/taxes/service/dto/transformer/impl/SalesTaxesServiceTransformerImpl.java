@@ -7,6 +7,8 @@ import com.lm.challenge.taxes.service.dto.transformer.impl.mapper.SalesTaxesServ
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+
 @Component
 public class SalesTaxesServiceTransformerImpl implements SalesTaxesServiceTransformer {
 
@@ -18,7 +20,7 @@ public class SalesTaxesServiceTransformerImpl implements SalesTaxesServiceTransf
     }
 
     @Override
-    public BasketODTO toODTO(BasketIDTO basketIDTO, Double taxes, Double total) {
+    public BasketODTO toODTO(BasketIDTO basketIDTO, BigDecimal taxes, BigDecimal total) {
         BasketODTO basketODTO = mapper.toODTO(basketIDTO);
         basketODTO.setTaxes(taxes);
         basketODTO.setTotalPrice(total);

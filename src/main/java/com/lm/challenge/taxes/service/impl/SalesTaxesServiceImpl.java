@@ -9,6 +9,7 @@ import com.lm.challenge.taxes.service.dto.output.BasketODTO;
 import com.lm.challenge.taxes.service.dto.transformer.SalesTaxesServiceTransformer;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 public class SalesTaxesServiceImpl implements SalesTaxesService {
@@ -17,9 +18,8 @@ public class SalesTaxesServiceImpl implements SalesTaxesService {
 
     private SalesTaxesServiceTransformer transformer;
 
-    private static final Double BASE_TAX = 0.10;
-    private static final Double IMPORTED_TAX = 0.05;
-    private static final Integer TWO_DIGITS = 100;
+    private static final BigDecimal BASE_TAX = new BigDecimal("0.1");
+    private static final BigDecimal IMPORTED_TAX = new BigDecimal("0.05");
 
 
     @Autowired
@@ -32,41 +32,39 @@ public class SalesTaxesServiceImpl implements SalesTaxesService {
     @Override
     public BasketODTO calculateTaxes(BasketIDTO basketIDTO) {
 
-        Double totalTaxes = 0.0;
-        Double totalPrice = 0.0;
+        BigDecimal totalTaxes = BigDecimal.ZERO;
+        BigDecimal totalPrice = BigDecimal.ZERO;
         for (ProductBaseDTO product : basketIDTO.getProducts()){
-            Optional<ProductTypeExcludeMO> excluded =  repository.findByType(product.getType().name());
-            Double tax = BASE_TAX;
-            if(!excluded.isPresent()){
-                tax = product.getImported() ? BASE_TAX + IMPORTED_TAX : BASE_TAX;
-                double productTaxes = calculateProductTaxes(product, tax);
-                productTaxes = roundTaxes (productTaxes);
-                totalTaxes += productTaxes;
-                double roundedPrice = Math.round((product.getPrice() + productTaxes)*TWO_DIGITS);
-                product.setPrice(roundedPrice/TWO_DIGITS);
-            } else {
-                if (product.getImported()){
-                    totalTaxes += calculateProductTaxes(product, IMPORTED_TAX);
-                    totalTaxes = roundTaxes (totalTaxes);
-                    double roundedPrice = Math.round((product.getPrice() + totalTaxes)*TWO_DIGITS);
-                    product.setPrice(roundedPrice/TWO_DIGITS);
-                }
-            }
-
-            totalPrice += product.getPrice();
+            BigDecimal tax = calculateQuantityTaxes(product);
+            BigDecimal productTaxes = calculateProductTaxes(product, tax);
+            totalTaxes = totalTaxes.add(productTaxes);
+            BigDecimal roundedPrice = (product.getPrice().add(productTaxes));
+            product.setPrice(roundedPrice);
+            totalPrice = totalPrice.add(product.getPrice());
         }
-        //We need truncate to 2 decimals
-        totalPrice = Math.floor(totalPrice * TWO_DIGITS)/TWO_DIGITS;
         return transformer.toODTO(basketIDTO, totalTaxes, totalPrice);
     }
 
-    private Double roundTaxes(Double taxes) {
-        double a = Math.ceil(taxes * 20);
-        return a / 20;
-
+    private BigDecimal calculateQuantityTaxes (ProductBaseDTO product){
+        Optional<ProductTypeExcludeMO> excluded =  repository.findByType(product.getType().name());
+        BigDecimal tax = BigDecimal.ZERO;
+        if(!excluded.isPresent()){
+            tax = tax.add(BASE_TAX);
+        }
+        if (product.getImported()){
+            tax = tax.add(IMPORTED_TAX);
+        }
+        return tax;
     }
 
-    private Double calculateProductTaxes(ProductBaseDTO product, Double tax) {
-        return (product.getPrice() * tax) * product.getQuantity();
+    private BigDecimal roundTaxes(BigDecimal taxes) {
+        Double a = Math.ceil(taxes.doubleValue() * 20);
+        a = a /20;
+        return new BigDecimal(a.toString());
+    }
+
+    private BigDecimal calculateProductTaxes(ProductBaseDTO product, BigDecimal tax) {
+        BigDecimal taxAmount =  (product.getPrice().multiply(tax)).multiply(new BigDecimal(product.getQuantity()));
+        return roundTaxes(taxAmount);
     }
 }
