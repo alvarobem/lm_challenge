@@ -4,6 +4,10 @@ import com.lm.challenge.taxes.persistence.model.ProductType;
 import com.lm.challenge.taxes.persistence.model.ProductTypeExcludeMO;
 import com.lm.challenge.taxes.persistence.repository.ProductTypeExcludeRepository;
 import com.lm.challenge.taxes.service.SalesTaxesService;
+import com.lm.challenge.taxes.service.calculator.TaxCalculator;
+import com.lm.challenge.taxes.service.calculator.impl.TaxCalculatorImpl;
+import com.lm.challenge.taxes.service.calculator.impl.decorator.BaseTaxDecorator;
+import com.lm.challenge.taxes.service.calculator.impl.decorator.ImportedTaxDecorator;
 import com.lm.challenge.taxes.service.dto.base.ProductBaseDTO;
 import com.lm.challenge.taxes.service.dto.input.BasketIDTO;
 import com.lm.challenge.taxes.service.dto.output.BasketODTO;
@@ -22,10 +26,6 @@ public class SalesTaxesServiceImpl implements SalesTaxesService {
     private ProductTypeExcludeRepository repository;
 
     private SalesTaxesServiceTransformer transformer;
-
-    private static final BigDecimal BASE_TAX = new BigDecimal("0.1");
-    private static final BigDecimal IMPORTED_TAX = new BigDecimal("0.05");
-
 
     @Autowired
     public SalesTaxesServiceImpl (ProductTypeExcludeRepository repository,
@@ -53,14 +53,15 @@ public class SalesTaxesServiceImpl implements SalesTaxesService {
     private BigDecimal calculateQuantityTaxes (ProductBaseDTO product){
         ProductType productType = transformer.toProductType(product.getType());
         Optional<ProductTypeExcludeMO> excluded =  repository.findByType(productType);
-        BigDecimal tax = BigDecimal.ZERO;
+        TaxCalculator taxCalculator = new TaxCalculatorImpl();
+
         if(!excluded.isPresent()){
-            tax = tax.add(BASE_TAX);
+            taxCalculator = new BaseTaxDecorator(taxCalculator);
         }
         if (product.getImported()){
-            tax = tax.add(IMPORTED_TAX);
+            taxCalculator = new ImportedTaxDecorator(taxCalculator);
         }
-        return tax;
+        return taxCalculator.getTaxes();
     }
 
     private BigDecimal roundTaxes(BigDecimal taxes) {
