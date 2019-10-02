@@ -1,5 +1,6 @@
 package com.lm.challenge.taxes.service.impl;
 
+import com.lm.challenge.taxes.persistence.model.ProductType;
 import com.lm.challenge.taxes.persistence.model.ProductTypeExcludeMO;
 import com.lm.challenge.taxes.persistence.repository.ProductTypeExcludeRepository;
 import com.lm.challenge.taxes.service.SalesTaxesService;
@@ -8,10 +9,12 @@ import com.lm.challenge.taxes.service.dto.input.BasketIDTO;
 import com.lm.challenge.taxes.service.dto.output.BasketODTO;
 import com.lm.challenge.taxes.service.dto.transformer.SalesTaxesServiceTransformer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 
+@Service
 public class SalesTaxesServiceImpl implements SalesTaxesService {
 
     private ProductTypeExcludeRepository repository;
@@ -46,7 +49,8 @@ public class SalesTaxesServiceImpl implements SalesTaxesService {
     }
 
     private BigDecimal calculateQuantityTaxes (ProductBaseDTO product){
-        Optional<ProductTypeExcludeMO> excluded =  repository.findByType(product.getType().name());
+        ProductType productType = transformer.toProductType(product.getType());
+        Optional<ProductTypeExcludeMO> excluded =  repository.findByType(productType);
         BigDecimal tax = BigDecimal.ZERO;
         if(!excluded.isPresent()){
             tax = tax.add(BASE_TAX);
