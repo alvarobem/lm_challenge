@@ -1,15 +1,17 @@
 package com.lm.challenge.taxes.service.dto.transformer.impl;
 
+import com.lm.challenge.taxes.persistence.model.ProductType;
 import com.lm.challenge.taxes.service.dto.base.ProductBaseDTO;
 import com.lm.challenge.taxes.service.dto.base.type.ProductTypeDTO;
 import com.lm.challenge.taxes.service.dto.input.BasketIDTO;
 import com.lm.challenge.taxes.service.dto.output.BasketODTO;
 import com.lm.challenge.taxes.service.dto.transformer.impl.mapper.SalesTaxesServiceMapper;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
+import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -22,8 +24,12 @@ public class SalesTaxesServiceTransformerImplTest {
     @Spy
     private SalesTaxesServiceMapper mapper = SalesTaxesServiceMapper.INSTANCE;
 
-    @InjectMocks
     private SalesTaxesServiceTransformerImpl transformer;
+
+    @Before
+    public void init (){
+        transformer = new SalesTaxesServiceTransformerImpl(mapper);
+    }
 
     @Test
     public void shouldTransformToODTO() {
@@ -52,6 +58,18 @@ public class SalesTaxesServiceTransformerImplTest {
         basketODTO.getProducts().forEach(product -> assertProductBase(productBaseDTO, product));
         assertEquals(taxes, basketODTO.getTaxes());
 
+    }
+
+    @Test
+    public void shouldTransformToProductType() {
+        //given
+        ProductTypeDTO productTypeDTO = ProductTypeDTO.BOOK;
+
+        //when
+        ProductType productType = transformer.toProductType(productTypeDTO);
+
+        //then
+        assertEquals(ProductType.BOOK, productType);
     }
 
     private void assertProductBase(ProductBaseDTO input, ProductBaseDTO output) {

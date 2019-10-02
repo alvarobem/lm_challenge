@@ -6,6 +6,7 @@ import com.lm.challenge.taxes.controller.dto.transformer.SalesTaxesControllerTra
 import com.lm.challenge.taxes.controller.dto.transformer.impl.mapper.SalesTaxesControllerMapper;
 import com.lm.challenge.taxes.service.dto.input.BasketIDTO;
 import com.lm.challenge.taxes.service.dto.output.BasketODTO;
+import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

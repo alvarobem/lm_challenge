@@ -8,9 +8,11 @@ import com.lm.challenge.taxes.service.dto.base.ProductBaseDTO;
 import com.lm.challenge.taxes.service.dto.input.BasketIDTO;
 import com.lm.challenge.taxes.service.dto.output.BasketODTO;
 import com.lm.challenge.taxes.service.dto.transformer.SalesTaxesServiceTransformer;
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.util.Optional;
 
@@ -33,7 +35,7 @@ public class SalesTaxesServiceImpl implements SalesTaxesService {
     }
 
     @Override
-    public BasketODTO calculateTaxes(BasketIDTO basketIDTO) {
+    public BasketODTO calculateTaxes(@Valid BasketIDTO basketIDTO) {
 
         BigDecimal totalTaxes = BigDecimal.ZERO;
         BigDecimal totalPrice = BigDecimal.ZERO;
@@ -62,9 +64,8 @@ public class SalesTaxesServiceImpl implements SalesTaxesService {
     }
 
     private BigDecimal roundTaxes(BigDecimal taxes) {
-        Double a = Math.ceil(taxes.doubleValue() * 20);
-        a = a /20;
-        return new BigDecimal(a.toString());
+        Double roundedTaxes = Math.ceil(taxes.doubleValue() * 20) / 20;
+        return new BigDecimal(roundedTaxes.toString());
     }
 
     private BigDecimal calculateProductTaxes(ProductBaseDTO product, BigDecimal tax) {

@@ -6,7 +6,6 @@ import com.lm.challenge.taxes.controller.dto.transformer.SalesTaxesControllerTra
 import com.lm.challenge.taxes.service.SalesTaxesService;
 import com.lm.challenge.taxes.service.dto.input.BasketIDTO;
 import com.lm.challenge.taxes.service.dto.output.BasketODTO;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api")
@@ -33,10 +34,8 @@ public class SalesTaxesController {
         this.service = service;
     }
 
-
     @PostMapping(TAXES_PATH)
-    public ResponseEntity<BasketRSDTO> calculateTaxes(@RequestBody @NonNull BasketRQDTO basketRQDTO){
-
+    public ResponseEntity<BasketRSDTO> calculateTaxes(@RequestBody BasketRQDTO basketRQDTO){
         log.debug("INIT calculate taxes with request: {}", basketRQDTO);
         BasketIDTO basketIDTO = transformer.toIDTO(basketRQDTO);
         BasketODTO basketODTO = service.calculateTaxes(basketIDTO);
